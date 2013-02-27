@@ -59,3 +59,46 @@
 2013-02-27 02:05:17: Run of MNIST.py is complete!
 
 
+2013-02-27 02:07:58: Starting run of MNIST.py
+2013-02-27 02:07:58: Namespace(dict_atoms='500', dict_init='gabor', dict_reg='0.003', mod_reg='0.001')
+
+
+2013-02-27 02:08:34: Starting run of MNIST.py
+2013-02-27 02:08:34: Namespace(dict_atoms='500', dict_init='gabor', dict_reg='0.003', mod_reg='0.001')
+2013-02-27 02:08:37: === Batch training ===
+2013-02-27 02:08:37: Iteration 1
+2013-02-27 02:08:37: Iteration 2
+2013-02-27 02:08:37: Iteration 3
+2013-02-27 02:08:37: Iteration 4
+2013-02-27 02:08:37: Iteration 5
+2013-02-27 02:08:37: Iteration 6
+2013-02-27 02:08:38: Iteration 7
+2013-02-27 02:08:38: Iteration 8
+2013-02-27 02:08:38: Iteration 9
+2013-02-27 02:08:38: Iteration 10
+2013-02-27 02:08:38: Trained sample in 0.45 seconds
+2013-02-27 02:08:38: === Save figures ===
+
+
+2013-02-27 02:12:01: Starting run of MNIST.py
+2013-02-27 02:12:01: Namespace(dict_atoms='500', dict_init='gabor', dict_reg='0.003', mod_reg='0.001')
+
+
+2013-02-27 02:12:15: Starting run of MNIST.py
+2013-02-27 02:12:15: Namespace(dict_atoms='500', dict_init='gabor', dict_reg='0.003', mod_reg='0.001')
+2013-02-27 02:12:17: 500
+2013-02-27 02:12:17: === Batch training ===
+2013-02-27 02:12:17: Iteration 1
+2013-02-27 02:12:17: Iteration 2
+2013-02-27 02:12:17: Iteration 3
+2013-02-27 02:12:17: Iteration 4
+2013-02-27 02:12:17: Iteration 5
+2013-02-27 02:12:17: Iteration 6
+2013-02-27 02:12:17: Iteration 7
+2013-02-27 02:12:17: Iteration 8
+2013-02-27 02:12:17: Iteration 9
+2013-02-27 02:12:17: Iteration 10
+2013-02-27 02:12:18: Trained sample in 0.38 seconds
+2013-02-27 02:12:18: === Save figures ===
+
+
