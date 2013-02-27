@@ -45,7 +45,7 @@ dim = X_train.shape[1]
 ## Dictionary
 lasso_d = dictionary.Dictionary(dim, DICT_ATOMS, 'lasso', DICT_REG, DICT_INIT)
 
-lasso_d.batchtrain(X_train)
+lasso_d.batchtrain(X_train[range(10),:])
 
 # Save dictionary atoms as images
 lasso_d.dimagesave((28, 28), 'mnist_demean')

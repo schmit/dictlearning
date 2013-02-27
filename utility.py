@@ -44,7 +44,7 @@ def gabor2DFunction(frequency, rotation, gamma=1, etha=1, m=28, n=28):
         Implementation of normalized 2-D Gabor filter function
         defined by Kyrki V, 2002
         '''
-        fmax = 1 / 14.0
+        fmax = 1/7.0
         a = 0.5
         flist = [(a ** k) * fmax for k in xrange(frequency)]
         thetalist = [2 * pi * angle / rotation for angle in xrange(rotation)]
@@ -75,7 +75,7 @@ def gabor2DFunction(frequency, rotation, gamma=1, etha=1, m=28, n=28):
         return [np.reshape(np.reshape(f, (m, n)), (m * n, 1), order='F') for f in gb]
 
 def test():
-    g = gabor2DFunction(3,6)
-    for i in xrange(18):
+    g = gabor2DFunction(1,8)
+    for i in xrange(8):
         plt.imshow(np.reshape(g[i],(28,28),order='F'))
         plt.show()
