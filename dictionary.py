@@ -71,11 +71,16 @@ class Dictionary:
             D = np.random.rand(self.__dim, self.__natoms)
             self.__D = D
         elif init == 'gabor':
-            n = max(self.__dim, self.__natoms)
-            atoms = utility.gabor2DFunction(4,int(np.ceil(n/4)))
+            if self.__dim < self.__natoms:
+                n = int(np.ceil(np.sqrt(self.__dim)))
+                atoms = utility.gabor2DFunction(n,n)
+            else:
+                atoms = utility.gabor2DFunction(int(np.ceil((self.__natoms+5)/4)),4)
+
             D = np.zeros((self.__dim, self.__natoms))
-            idx = [int(np.ceil(x))-1 for x in np.linspace(0,max(self.__dim,self.__natoms),self.__natoms)]
-            atoms = [atoms[i] for i in idx] #numpy.random.permutation(atoms)[:self.__natoms]
+        
+            atoms = atoms[:self.__natoms]
+
             for idx, atom in enumerate(atoms):
                 D[:, idx] = np.transpose(atom) / np.linalg.norm(atom)
             self.__D = D
