@@ -177,7 +177,7 @@ class Dictionary:
         print "Average relative l2 error on reconstruction set is: %0.2f" % (avg_err)
 
         # save encoding to matlab file for later use
-        folder = "./encodings/%s/" % (self.__dinit)
+        folder = "./encodings/%s/%s/" % (dataname, self.__dinit)
         filename = "%r_%r" % (self.__natoms, int(self.__method_par * 100000))
         utility.savematrix(alphas, folder, filename)
         # timing
