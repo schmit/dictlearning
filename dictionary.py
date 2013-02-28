@@ -40,6 +40,7 @@ class Dictionary:
 
         # Sparse coding method
         self.__method_par = method_parameters
+        self.__method_name = method
         self.initcodingmethod(method, method_parameters)
 
         # Extras
@@ -177,7 +178,7 @@ class Dictionary:
         print "Average relative l2 error on reconstruction set is: %0.2f" % (avg_err)
 
         # save encoding to matlab file for later use
-        folder = "./encodings/%s/%s/" % (dataname, self.__dinit)
+        folder = "./encodings/%s/%s/%s/" % (dataname, self.__method_name, self.__dinit)
         filename = "%r_%r" % (self.__natoms, int(self.__method_par * 100000))
         utility.savematrix(alphas, folder, filename)
         # timing
@@ -262,7 +263,7 @@ class Dictionary:
         print "=== Save figures ==="
 
         # Make directory if it does not exist
-        folder = "./images/%s/%s_%d_%d/" % (imname, self.__dinit, self.__natoms, int(self.__method_par * 100000))
+        folder = "./images/%s/%s/%s_%d_%d/" % (imname, self.__method_name, self.__dinit, self.__natoms, int(self.__method_par * 100000))
         d = os.path.dirname(folder)
         if not os.path.exists(d):
             os.makedirs(d)
