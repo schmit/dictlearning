@@ -19,7 +19,7 @@ DICT_UPD_MAX_ITR = 50
 
 class Dictionary:
     def __init__(self, dimension, nr_atoms, method, method_parameters, init):
-        methods = ['linreg', 'lars', 'lasso']
+        methods = ['linreg', 'lars', 'lassolars', 'lasso']
         inits = ['randn', 'randu', 'gabor']
         # check the method is implemented
         assert(method in methods)
@@ -67,9 +67,15 @@ class Dictionary:
         # for now: return random matrix
         if init == 'randn':
             D = np.random.randn(self.__dim, self.__natoms)
+            # normalize cols
+            for j in range(D.shape[1]):
+                D[:,j] = D[:,j]/np.linalg.norm(D[:,j])
             self.__D = D
         elif init == 'randu':
             D = np.random.rand(self.__dim, self.__natoms)
+            # normalize cols
+            for j in range(D.shape[1]):
+                D[:,j] = D[:,j]/np.linalg.norm(D[:,j])
             self.__D = D
         elif init == 'gabor':
             if self.__dim < self.__natoms:
@@ -92,6 +98,11 @@ class Dictionary:
             def fn(D, x, par):
                 return np.linalg.lstsq(D, x)[0]
         elif method == 'lars':
+            def fn(D, x, par):
+                clf = linear_model.Lars(fit_intercept = False, fit_path = False, n_nonzero_coefs = par)
+                clf.fit(D, x)
+                return clf.coef_[0]
+        elif method == 'lassolars':
             def fn(D, x, par):
                 clf = linear_model.LassoLars(alpha = method_parameters, fit_intercept = False, fit_path = False, \
                     normalize=False)
@@ -192,8 +203,8 @@ class Dictionary:
         Find a sparse coding of x in terms of the columns of the dictionary
         '''
         x = x - np.mean(x)
-        alpha = self.method_fn(self.__D, x, self.__method_par)
-        return alpha
+        a = self.method_fn(self.__D, x, self.__method_par)
+        return a
 
     def updateAB(self, x, alpha):
         '''
