@@ -1,27 +1,30 @@
 import numpy as np
 import numpy.linalg
-import numpy.random
-import scipy.io as sio
 import time
 from sklearn import linear_model
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 import os
 import utility
+from math import sqrt
 
 # Constants regarding dictionary update
 # Move later
-DICT_UPD_TOLERANCE = 10 ** -3
+DICT_UPD_TOLERANCE = 10**-3
 DICT_UPD_MAX_ITR = 50
-# Dictionary tolerance doesnt seem to have much influence 
+# Dictionary tolerance doesnt seem to have much influence
 #  on accuraccy nor computation time
 # Dictionary max itr seems to be never reached, but a nice fail safe
 
 # When to merge atoms when they are too similar
-DICT_DIFF_TOL = 0.9
+DICT_MAX_ATOMS = 100
+DICT_MAX_CORR = 0.98
+
+# Accepts lower precision for the first observations
+# Select number here
+DICT_SLOWDOWN = 100
 
 
-class AdaDict:
+class AdapDict:
     def __init__(self, dimension, accuracy, method, method_parameters):
         methods = ['linreg', 'lars', 'lassolars', 'lasso']
         # check the method is implemented
@@ -36,7 +39,7 @@ class AdaDict:
         # initialization method for dictionary
 
         # Dictionary matrix, start with all ones
-        self.__D = np.ones((self.__dim, 1)) 
+        self.__D = sqrt(1.0/self.__dim) * np.ones((self.__dim, 1))
         # A and B as defined on page 25 of Mairal
         self.__A = np.zeros((self.__natoms, self.__natoms))
         self.__B = np.zeros((self.__dim, self.__natoms))
@@ -48,12 +51,14 @@ class AdaDict:
 
         # Extras
         self.__ntrained = 0
+        print "\t\t\tAdaptive Dictionary Initialized"
+
 
     def __repr__(self):
         string = "\t===Sparse dictionary model===\n"
         string += "Dimension: %d\n" % (self.__dim)
         string += "Number of atoms: %d\n" % (self.__natoms)
-        return string               
+        return string
 
     def initcodingmethod(self, method, method_parameters):
         '''
@@ -65,27 +70,27 @@ class AdaDict:
         Also note that lars takes in the number of non-zero coefficients,
         while lasso and larslasso take in the regularization parameter lambda
         '''
-        
+
         if method == 'linreg':
             def fn(D, x, par):
                 return np.linalg.lstsq(D, x)[0]
         elif method == 'lars':
             def fn(D, x, par):
-                clf = linear_model.Lars(fit_intercept = False, fit_path = True, \
-                        n_nonzero_coefs = par)
+                clf = linear_model.Lars(fit_intercept=False, fit_path=True, \
+                    n_nonzero_coefs = par)
                 clf.fit(D, x)
                 return clf.coef_
         elif method == 'lassolars':
             def fn(D, x, par):
-                clf = linear_model.LassoLars(alpha = method_parameters, \
-                        fit_intercept = False, fit_path = False, \
+                clf = linear_model.LassoLars(alpha=method_parameters, \
+                    fit_intercept = False, fit_path=False, \
                     normalize=False)
                 clf.fit(D, x)
                 return clf.coef_[0]
         elif method == 'lasso':
             def fn(D, x, par):
-                clf = linear_model.Lasso(alpha = method_parameters, \
-                        fit_intercept = False)
+                clf = linear_model.Lasso(alpha=method_parameters, \
+                    fit_intercept=False)
                 clf.fit(D, x)
                 return clf.coef_
         self.method_fn = fn
@@ -100,9 +105,10 @@ class AdaDict:
         # accuracy of fit:
         recon_err = (np.linalg.norm(x - np.dot(self.__D, alpha)) \
                 /(np.linalg.norm(x)+10**-6))
-
+        start_err_bonus = max(0,(DICT_SLOWDOWN - self.__natoms + 0.0) / DICT_SLOWDOWN)
+        recon_err -= start_err_bonus/10
         # If the coding is not good enough, add the x to dictionary
-        if recon_err > self.__acc:
+        if recon_err > self.__acc and self.__natoms < DICT_MAX_ATOMS:
             self.appendtoD(x)
         # else update the dictionary
         else:
@@ -110,6 +116,11 @@ class AdaDict:
             self.updateAB(x, alpha)
             # update dictionary
             self.updateD(DICT_UPD_TOLERANCE, DICT_UPD_MAX_ITR)
+
+        # remove near duplications from D
+        if self.__natoms > 0:
+            # only remove when there are enough atoms
+            self.removeduplicatesD()
 
         # increase counter of number of samples trained
         self.__ntrained += 1
@@ -124,6 +135,7 @@ class AdaDict:
         for j in range(xrange):
             if (j + 1) % (xrange / 10) == 0:
                 print "Iteration %d" % (j + 1)
+                print "Number of atoms: %d" % self.__natoms
             self.train(X[j, :])
         print "Trained sample in %0.2f seconds" % (time.time() - time_start)
 
@@ -150,7 +162,7 @@ class AdaDict:
         # sum of non-zero coefficients
         sum_nnz = 0.0
         # sum of errors
-        sum_err = 0
+        sum_err = 0.0
 
         # the encodings
         alphas = np.zeros((X.shape[0], self.__natoms))
@@ -170,16 +182,17 @@ class AdaDict:
         avg_nnz = sum_nnz / n
         avg_err = sum_err / n
         print "Average fraction of nonzero coefficients: %f" % \
-                (avg_nnz / self.__natoms)
+            (avg_nnz / self.__natoms)
         print "Average relative l2 error on reconstruction set is: %0.2f" % \
-                (avg_err)
+            (avg_err)
 
         # save encoding to matlab file for later use
         folder = "./encodings/%s/%s/" % (dataname, self.__method_name)
         filename = "%r_%r" % (self.__natoms, int(self.__method_par * 100000))
         utility.savematrix(alphas, folder, filename)
         # timing
-        print "Reconstructed sample in %0.2f seconds" % (time.time() - time_start)
+        print "Reconstructed sample in %0.2f seconds" % \
+            (time.time() - time_start)
 
         return alphas
 
@@ -220,8 +233,8 @@ class AdaDict:
                 # only update columns that are used
                 if self.__A[j, j] != 0:
                     u = (self.__B[:, j] - np.dot(self.__D, self.__A[:, j])) \
-                            / self.__A[j, j] + self.__D[:, j]
-                    self.__D[:, j] = u / max(np.linalg.norm(u), 1)
+                        / self.__A[j, j] + self.__D[:, j]
+                    self.__D[:, j] = u / max(np.linalg.norm(u), 10**-6)
 
             # check the new norm for D
             norm_D_new = np.linalg.norm(self.__D)
@@ -252,8 +265,12 @@ class AdaDict:
     def setD(self, matrix):
         self.__D = matrix
 
+    def getnatoms(self):
+        return self.__natoms
+
+
     def appendtoD(self, x):
-        col = x.reshape((x.shape[0], 1))
+        col = x.reshape((x.shape[0], 1)) / (np.linalg.norm(x) + 10**-8)
         self.__D = np.append(self.__D, col, axis=1)
         # increase size of A
         # column
@@ -265,6 +282,45 @@ class AdaDict:
         # increase atom count
         self.__natoms += 1
 
+    def removeduplicatesD(self):
+        '''
+        Possibly merge columns if they are too similar
+        '''
+        sim = abs(np.dot(self.__D.T, self.__D)) - np.identity(self.__natoms)
+
+        most_correlated = np.unravel_index(np.argmax(sim), sim.shape)
+        if (sim[most_correlated] > DICT_MAX_CORR) and (self.__natoms-1 not in most_correlated):
+            # index where we will merge
+            merger = most_correlated[0]
+            # index that will be removed
+            remover = most_correlated[1]
+
+            # Merge in D
+            self.__D[:, merger] = 0.5 * self.__D[:, merger] \
+                + 0.5 * self.__D[:, remover]
+            self.__D = np.delete(self.__D, remover, 1)
+
+            # Merge in A
+            newA = self.__A
+
+            # update the merger row and column
+            newA[merger, :] = 0.5 * self.__A[merger, :] \
+                + 0.5 * self.__A[remover, :]
+            newA[:, merger] = 0.5 * self.__A[:, merger] \
+                + 0.5 * self.__A[:, remover]
+            # remove the remover row and column
+            newA = np.delete(newA, remover, 0)
+            newA = np.delete(newA, remover, 1)
+
+            self.__A = newA
+
+            # Merge in B
+            self.__B[:, merger] = 0.5 * self.__B[:, merger] \
+                + 0.5 * self.__B[:, remover]
+            self.__B = np.delete(self.__B, remover, 1)
+
+            self.__natoms -= 1
+
     def dimagesave(self, dimensions, imname):
         '''
         Saves all the atoms of the dictionary as images
@@ -274,7 +330,8 @@ class AdaDict:
         print "=== Save figures ==="
 
         # Make directory if it does not exist
-        folder = "./images/%s/%s/%d_%d/" % (imname, self.__method_name, self.__natoms, int(self.__method_par * 100000))
+        folder = "./images/%s/%s/%d_%d/" % (imname, self.__method_name,
+            self.__natoms, int(self.__method_par * 100000))
         d = os.path.dirname(folder)
         if not os.path.exists(d):
             os.makedirs(d)
@@ -285,9 +342,9 @@ class AdaDict:
             filename = "%d" % (i)
             plt.savefig(folder + filename + '.png')
 
-
-train = "./matlab/X_small.mat"
-test = "./matlab/y_small.mat"
+'''
+train = "./matlab/X_test.mat"
+test = "./matlab/y_test.mat"
 # load data
 X = sio.loadmat(train)
 y = sio.loadmat(test)
@@ -295,7 +352,7 @@ X = X['X'].T
 y = y['y'].T
 dim = X.shape[1]
 
-ad = AdaDict(dim,0.5, 'lasso', 0.5)
+ad = AdapDict(dim,0.5, 'lasso', 0.5)
 
 print ad
 
@@ -304,3 +361,4 @@ ad.batchreconstruction(y, 'ytest_n')
 
 print ad
 ad.dimagesave((5,2), 'test')
+'''
