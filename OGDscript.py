@@ -16,29 +16,30 @@ enc_test_file = 'encodings/mnist_test_s/lasso/100_100.mat'
 enc_train = sio.loadmat(enc_train_file)
 enc_test = sio.loadmat(enc_test_file)
 
-A_train = enc_train['alphas'].todense()
-A_test = enc_test['alphas'].todense()
+A_train = enc_train['alphas'].toarray()
+A_test = enc_test['alphas'].toarray()
 
 X_train = mnist_train['X'][0][0][2].transpose()
 X_test = mnist_test['Xtest'].transpose()
 
-print A_train.shape
-print X_train.shape
+print type(A_train)
+print type(X_train)
 
 print 'Loading complete'
 
 print '\t\t\t====== Dictionary ======'
 
 # train model
-dictmod = multiOGD(10, 100, 0.001)
+dictmod = multiOGD(10, 100, 0.008)
 dictmod.train(A_train, y_train)
 # predict
 dictmod.predict(A_test, y_test)
 
 print '\t\t\t===== No dictionary ======'
-
+'''
 # train model
 model = multiOGD(10, 784, 0.001)
 model.train(X_train, y_train)
 # predict
 model.predict(X_test, y_test)
+'''
