@@ -12,12 +12,18 @@ import utility
 sys.stdout = utility.Logger()
 print 'Starting run of MNIST.py'
 
-parser = argparse.ArgumentParser(description='MNIST: Encode sparse dictionary and fit model')
-parser.add_argument('dict_fit', help="model for fitting dictionary (linreg, lasso, lars)")
-parser.add_argument('dict_init', help='initialization of dictionary')
-parser.add_argument('dict_atoms', help='nr of atoms in dictionary')
-parser.add_argument('dict_reg', help='regularization in sparse encoding')
-parser.add_argument('mod_reg', help='regularization svm fit')
+parser = argparse.ArgumentParser(description=\
+		'MNIST: Encode sparse dictionary and fit model')
+parser.add_argument('dict_fit',\
+		help="model for fitting dictionary (linreg, lasso, lars)")
+parser.add_argument('dict_init',\
+		help='initialization of dictionary')
+parser.add_argument('dict_atoms',\
+		help='nr of atoms in dictionary')
+parser.add_argument('dict_reg',\
+		help='regularization in sparse encoding')
+parser.add_argument('mod_reg', \
+		help='regularization svm fit')
 
 params = parser.parse_args(sys.argv[1:])
 
@@ -45,16 +51,19 @@ y_test = mnist_test['ytest']
 dim = X_train.shape[1]
 
 ## Dictionary
-lasso_d = dictionary.Dictionary(dim, DICT_ATOMS, DICT_FIT, DICT_REG, DICT_INIT)
+lasso_d = dictionary.Dictionary(dim, DICT_ATOMS, DICT_FIT, DICT_REG, \
+		DICT_INIT)
 
-lasso_d.batchtrain(X_train)
+lasso_d.batchtrain(X_train
 
 # Save dictionary atoms as images
-lasso_d.dimagesave((28, 28), 'mnist')
+#lasso_d.dimagesave((28, 28), 'mnist')
 
 # Find reconstructions
-alphas_train = lasso_d.batchreconstruction(X_train, 'mnist_train')
-alphas_test = lasso_d.batchreconstruction(X_test, 'mnist_test')
+alphas_train = lasso_d.batchreconstruction(X_train, \
+		'mnist_train_s')
+alphas_test = lasso_d.batchreconstruction(X_test, \
+		'mnist_test_s')
 
 ## Classification
 ogd_m = multiOGD(10, DICT_ATOMS, MOD_REG)
