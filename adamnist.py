@@ -55,9 +55,9 @@ mod.batchtrain(X_train)
 
 # Find reconstructions
 alphas_train = mod.batchreconstruction(X_train, \
-    'mnist_train_s')
+    'mnist_train')
 alphas_test = mod.batchreconstruction(X_test, \
-    'mnist_test_s')
+    'mnist_test')
 
 print mod
 
