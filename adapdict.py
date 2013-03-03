@@ -201,7 +201,6 @@ class AdapDict:
         Subroutine of train
         Find a sparse coding of x in terms of the columns of the dictionary
         '''
-        x = x - np.mean(x)
         a = self.method_fn(self.__D, x, self.__method_par)
         return a
 
