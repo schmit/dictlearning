@@ -13,7 +13,8 @@ import utility
 # Move later
 DICT_UPD_TOLERANCE = 10 ** -3
 DICT_UPD_MAX_ITR = 50
-# Dictionary tolerance doesnt seem to have much influence on accuraccy nor computation time
+# Dictionary tolerance doesnt seem to have much influence 
+#  on accuraccy nor computation time
 # Dictionary max itr seems to be never reached, but a nice fail safe
 
 
@@ -94,23 +95,36 @@ class Dictionary:
 
 
     def initcodingmethod(self, method, method_parameters):
+        '''
+        Method for fitting the coefficients
+
+        For dictionaries with large number of atoms, lars is fastest.
+        larslasso performs very slow with large number of atoms.
+
+        Also note that lars takes in the number of non-zero coefficients,
+        while lasso and larslasso take in the regularization parameter lambda
+        '''
+        
         if method == 'linreg':
             def fn(D, x, par):
                 return np.linalg.lstsq(D, x)[0]
         elif method == 'lars':
             def fn(D, x, par):
-                clf = linear_model.Lars(fit_intercept = False, fit_path = False, n_nonzero_coefs = par)
+                clf = linear_model.Lars(fit_intercept = False, fit_path = True, \
+                        n_nonzero_coefs = par)
                 clf.fit(D, x)
-                return clf.coef_[0]
+                return clf.coef_
         elif method == 'lassolars':
             def fn(D, x, par):
-                clf = linear_model.LassoLars(alpha = method_parameters, fit_intercept = False, fit_path = False, \
+                clf = linear_model.LassoLars(alpha = method_parameters, \
+                        fit_intercept = False, fit_path = False, \
                     normalize=False)
                 clf.fit(D, x)
                 return clf.coef_[0]
         elif method == 'lasso':
             def fn(D, x, par):
-                clf = linear_model.Lasso(alpha = method_parameters, fit_intercept = False)
+                clf = linear_model.Lasso(alpha = method_parameters, \
+                        fit_intercept = False)
                 clf.fit(D, x)
                 return clf.coef_
         self.method_fn = fn
@@ -185,11 +199,14 @@ class Dictionary:
                 print "Iteration %d" % (j + 1)
         avg_nnz = sum_nnz / n
         avg_err = sum_err / n
-        print "Average fraction of nonzero coefficients: %f" % (avg_nnz / self.__natoms)
-        print "Average relative l2 error on reconstruction set is: %0.2f" % (avg_err)
+        print "Average fraction of nonzero coefficients: %f" % \
+                (avg_nnz / self.__natoms)
+        print "Average relative l2 error on reconstruction set is: %0.2f" % \
+                (avg_err)
 
         # save encoding to matlab file for later use
-        folder = "./encodings/%s/%s/%s/" % (dataname, self.__method_name, self.__dinit)
+        folder = "./encodings/%s/%s/%s/" % (dataname, self.__method_name, \
+                self.__dinit)
         filename = "%r_%r" % (self.__natoms, int(self.__method_par * 100000))
         utility.savematrix(alphas, folder, filename)
         # timing
@@ -233,7 +250,8 @@ class Dictionary:
             for j in range(self.__natoms):
                 # only update columns that are used
                 if self.__A[j, j] != 0:
-                    u = (self.__B[:, j] - np.dot(self.__D, self.__A[:, j])) / self.__A[j, j] + self.__D[:, j]
+                    u = (self.__B[:, j] - np.dot(self.__D, self.__A[:, j])) \
+                            / self.__A[j, j] + self.__D[:, j]
                     self.__D[:, j] = u / max(np.linalg.norm(u), 1)
 
             # check the new norm for D
@@ -274,7 +292,8 @@ class Dictionary:
         print "=== Save figures ==="
 
         # Make directory if it does not exist
-        folder = "./images/%s/%s/%s_%d_%d/" % (imname, self.__method_name, self.__dinit, self.__natoms, int(self.__method_par * 100000))
+        folder = "./images/%s/%s/%s_%d_%d/" % (imname, self.__method_name, \
+                self.__dinit, self.__natoms, int(self.__method_par * 100000))
         d = os.path.dirname(folder)
         if not os.path.exists(d):
             os.makedirs(d)
