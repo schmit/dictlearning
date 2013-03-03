@@ -26,7 +26,7 @@ DICT_SLOWDOWN = 100
 
 class AdapDict:
     def __init__(self, dimension, accuracy, method, method_parameters):
-        methods = ['linreg', 'lars', 'lassolars', 'lasso']
+        methods = ['linreg', 'lars', 'lassolars', 'lasso', 'kl']
         # check the method is implemented
         assert(method in methods)
         assert(accuracy < 1)
@@ -93,6 +93,9 @@ class AdapDict:
                     fit_intercept=False)
                 clf.fit(D, x)
                 return clf.coef_
+        elif method == "kl":
+            def fn(D, x, par):
+                pass
         self.method_fn = fn
 
     def train(self, x):
@@ -252,22 +255,6 @@ class AdapDict:
                 # print 'not converged after %d iterations' %(max_itr)
                 # print 'current norm difference: %0.2e' %(norm_diff)
 
-    def getA(self):
-        return self.__A
-
-    def getB(self):
-        return self.__B
-
-    def getD(self):
-        return self.__D
-
-    def setD(self, matrix):
-        self.__D = matrix
-
-    def getnatoms(self):
-        return self.__natoms
-
-
     def appendtoD(self, x):
         col = x.reshape((x.shape[0], 1)) / (np.linalg.norm(x) + 10**-8)
         self.__D = np.append(self.__D, col, axis=1)
@@ -340,6 +327,21 @@ class AdapDict:
             imgplot = plt.imshow(img)
             filename = "%d" % (i)
             plt.savefig(folder + filename + '.png')
+
+    def getA(self):
+        return self.__A
+
+    def getB(self):
+        return self.__B
+
+    def getD(self):
+        return self.__D
+
+    def setD(self, matrix):
+        self.__D = matrix
+
+    def getnatoms(self):
+        return self.__natoms
 
 '''
 train = "./matlab/X_test.mat"
