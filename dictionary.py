@@ -164,7 +164,7 @@ class Dictionary:
         alpha = self.sparsecode(x)
         # reconstruction
         recon = np.dot(self.__D, alpha)
-        recon_err = np.linalg.norm(x - recon) / np.linalg.norm(x)
+        recon_err = np.linalg.norm(x - recon) / (np.linalg.norm(x)+10**-6)
         return alpha, recon_err
 
     def batchreconstruction(self, X, dataname):
