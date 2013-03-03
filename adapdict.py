@@ -35,11 +35,11 @@ class AdaDict:
         self.__acc = accuracy
         # initialization method for dictionary
 
-        # Dictionary matrix
-        self.initdictionary(init)
+        # Dictionary matrix, start with all ones
+        self.__D = np.ones((self.__dim, 1)) 
         # A and B as defined on page 25 of Mairal
-        self.__A = np.zeros((nr_atoms, nr_atoms))
-        self.__B = np.zeros((dimension, nr_atoms))
+        self.__A = np.zeros((self.__natoms, self.__natoms))
+        self.__B = np.zeros((self.__dim, self.__natoms))
 
         # Sparse coding method
         self.__method_par = method_parameters
@@ -53,22 +53,7 @@ class AdaDict:
         string = "\t===Sparse dictionary model===\n"
         string += "Dimension: %d\n" % (self.__dim)
         string += "Number of atoms: %d\n" % (self.__natoms)
-        return string
-
-    def initdictionary(self, init):
-        '''
-        Initialize the dictionary
-        Several initializations could be used:
-        - first few sample points
-        - DCT
-        - Wavelets
-        (see Mairal p.29)
-
-        Note the dimension of the dictionary should be (dim,nr_atoms)
-        '''
-
-        self.__D = np.ones((self.__dim, 1)) 
-               
+        return string               
 
     def initcodingmethod(self, method, method_parameters):
         '''
@@ -113,12 +98,18 @@ class AdaDict:
         alpha = self.sparsecode(x)
 
         # accuracy of fit:
-        recon_err = np.linalg.norm(x - np.dot(self.__D, alpha))/(np.linalg.norm(x)+10**-6)
+        recon_err = (np.linalg.norm(x - np.dot(self.__D, alpha)) \
+                /(np.linalg.norm(x)+10**-6))
 
-        # update matrices
-        self.updateAB(x, alpha)
-        # update dictionary
-        self.updateD(DICT_UPD_TOLERANCE, DICT_UPD_MAX_ITR)
+        # If the coding is not good enough, add the x to dictionary
+        if recon_err > self.__acc:
+            self.appendtoD(x)
+        # else update the dictionary
+        else:
+            # update matrices
+            self.updateAB(x, alpha)
+            # update dictionary
+            self.updateD(DICT_UPD_TOLERANCE, DICT_UPD_MAX_ITR)
 
         # increase counter of number of samples trained
         self.__ntrained += 1
@@ -184,8 +175,7 @@ class AdaDict:
                 (avg_err)
 
         # save encoding to matlab file for later use
-        folder = "./encodings/%s/%s/%s/" % (dataname, self.__method_name, \
-                self.__dinit)
+        folder = "./encodings/%s/%s/" % (dataname, self.__method_name)
         filename = "%r_%r" % (self.__natoms, int(self.__method_par * 100000))
         utility.savematrix(alphas, folder, filename)
         # timing
@@ -262,8 +252,18 @@ class AdaDict:
     def setD(self, matrix):
         self.__D = matrix
 
-    def appendtoD(self, col):
+    def appendtoD(self, x):
+        col = x.reshape((x.shape[0], 1))
         self.__D = np.append(self.__D, col, axis=1)
+        # increase size of A
+        # column
+        self.__A = np.append(self.__A, np.zeros((self.__natoms, 1)), axis=1)
+        # row
+        self.__A = np.append(self.__A, np.zeros((1, self.__natoms+1)), axis=0)
+        # add zero column to B
+        self.__B = np.append(self.__B, np.zeros((self.__dim, 1)), axis=1)
+        # increase atom count
+        self.__natoms += 1
 
     def dimagesave(self, dimensions, imname):
         '''
@@ -274,8 +274,7 @@ class AdaDict:
         print "=== Save figures ==="
 
         # Make directory if it does not exist
-        folder = "./images/%s/%s/%s_%d_%d/" % (imname, self.__method_name, \
-                self.__dinit, self.__natoms, int(self.__method_par * 100000))
+        folder = "./images/%s/%s/%d_%d/" % (imname, self.__method_name, self.__natoms, int(self.__method_par * 100000))
         d = os.path.dirname(folder)
         if not os.path.exists(d):
             os.makedirs(d)
@@ -287,8 +286,8 @@ class AdaDict:
             plt.savefig(folder + filename + '.png')
 
 
-train = "./matlab/X_test.mat"
-test = "./matlab/y_test.mat"
+train = "./matlab/X_small.mat"
+test = "./matlab/y_small.mat"
 # load data
 X = sio.loadmat(train)
 y = sio.loadmat(test)
@@ -296,11 +295,12 @@ X = X['X'].T
 y = y['y'].T
 dim = X.shape[1]
 
-ad = AdaDict(dim,0.4, 'lasso', 0.5, 'randn')
-
+ad = AdaDict(dim,0.5, 'lasso', 0.5)
 
 print ad
+
 ad.batchtrain(X)
 ad.batchreconstruction(y, 'ytest_n')
 
+print ad
 ad.dimagesave((5,2), 'test')
