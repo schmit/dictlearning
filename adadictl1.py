@@ -10,23 +10,7 @@ from math import sqrt
 import scipy.io as sio
 import egd
 import oiadmm
-from adapdict import AdapDict
-
-# Constants regarding dictionary update
-# Move later
-DICT_UPD_TOLERANCE = 10**-3
-DICT_UPD_MAX_ITR = 50
-# Dictionary tolerance doesnt seem to have much influence
-#  on accuraccy nor computation time
-# Dictionary max itr seems to be never reached, but a nice fail safe
-
-# When to merge atoms when they are too similar
-DICT_MAX_ATOMS = 100
-DICT_MAX_CORR = 0.98
-
-# Accepts lower precision for the first observations
-# Select number here
-DICT_SLOWDOWN = 100
+from adapdict import *
 
 
 class AdaDictL1(AdapDict):
@@ -34,7 +18,7 @@ class AdaDictL1(AdapDict):
         super(AdaDictL1, self).__init__(dimension, accuracy, sparse_method, sparse_parameters)
         self._L = self._D
 
-    def train(self, x, beta=5):
+    def train(self, x, beta=0.5):
         '''
         Train the dictionary on a single observation
         '''
@@ -51,11 +35,11 @@ class AdaDictL1(AdapDict):
         # else update the dictionary
         else:
             # IOADMM update
-            tau = 1.0/(2*np.dot(alpha,alpha))
+            tau = 1.0/(2*max(np.dot(alpha,alpha),1e-6))
             self._D, self._L = oiadmm.OIADMM(self._D, alpha, x, self._L, beta, tau)
             # normalize columns
             for j in range(self._natoms):
-                self._D[:,j] = self._D[:,j] / np.linalg.norm(self._D[:,j], 1)
+                self._D[:,j] = self._D[:,j] / max(10**-6, np.linalg.norm(self._D[:,j], 1))
         # remove near duplications from D
         if self._natoms > 0:
             # only remove when there are enough atoms
@@ -88,7 +72,7 @@ class AdaDictL1(AdapDict):
             self._D = np.delete(self._D, remover, 1)
             self._natoms -= 1
 
-
+'''
 train = "./matlab/X_test.mat"
 test = "./matlab/y_test.mat"
 # load data
@@ -107,4 +91,4 @@ ad.batchreconstruction(y, 'ytest_n')
 
 print ad
 ad.dimagesave((5,2), 'test')
-
+''' 

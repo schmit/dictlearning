@@ -9,23 +9,7 @@ import utility
 from math import sqrt
 import scipy.io as sio
 import egd
-from adapdict import AdapDict
-
-# Constants regarding dictionary update
-# Move later
-DICT_UPD_TOLERANCE = 10**-3
-DICT_UPD_MAX_ITR = 50
-# Dictionary tolerance doesnt seem to have much influence
-#  on accuraccy nor computation time
-# Dictionary max itr seems to be never reached, but a nice fail safe
-
-# When to merge atoms when they are too similar
-DICT_MAX_ATOMS = 100
-DICT_MAX_CORR = 0.98
-
-# Accepts lower precision for the first observations
-# Select number here
-DICT_SLOWDOWN = 100
+from adapdict import *
 
 
 class AdaDictL2(AdapDict):

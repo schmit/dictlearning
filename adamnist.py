@@ -13,15 +13,15 @@ import utility
 sys.stdout = utility.Logger()
 print 'Starting run of MNIST.py'
 
-parser = argparse.ArgumentParser(description=\
+parser = argparse.ArgumentParser(description=
         'MNIST: Encode sparse dictionary and fit model')
-parser.add_argument('dict_fit',\
+parser.add_argument('dict_fit',
         help="model for fitting dictionary (linreg, lasso, lars)")
-parser.add_argument('dict_acc',\
+parser.add_argument('dict_acc',
         help='desired accuracy')
-parser.add_argument('dict_reg',\
+parser.add_argument('dict_reg',
         help='regularization in sparse encoding')
-parser.add_argument('mod_reg', \
+parser.add_argument('mod_reg',
         help='regularization svm fit')
 
 params = parser.parse_args(sys.argv[1:])
@@ -49,33 +49,26 @@ y_test = mnist_test['ytest']
 dim = X_train.shape[1]
 
 ## Dictionary
-mod = adadictl2.AdaDictL2(dim, DICT_ACC, DICT_FIT, DICT_REG)
 modl1 = adadictl1.AdaDictL1(dim, DICT_ACC, DICT_FIT, DICT_REG)
 
 # Train model
-modl1.batchtrain(X_train[range(5000)])
-mod.batchtrain(X_train[range(5000)])
+modl1.batchtrain(X_train)
 
 # Find reconstructions
-alphas_train = modl1.batchreconstruction(X_train[range(5000)], \
+alphas_train = modl1.batchreconstruction(X_train,
     'mnist_train')
-alphas_test = modl1.batchreconstruction(X_test[range(5000)], \
+alphas_test = modl1.batchreconstruction(X_test,
     'mnist_test')
 
-alphas_train = mod.batchreconstruction(X_train[range(5000)], \
-    'mnist_train')
-alphas_test = mod.batchreconstruction(X_test[range(5000)], \
-    'mnist_test')
-
-print mod
+print modl1
 
 ## Classification
-ogd_m = multiOGD(10, mod.getnatoms(), MOD_REG)
-ogd_m.train(alphas_train, y_train[range(5000)])
-ogd_m.predict(alphas_test, y_test[range(5000)])
+ogd_m = multiOGD(10, modl1.getnatoms(), MOD_REG)
+ogd_m.train(alphas_train, y_train)
+ogd_m.predict(alphas_test, y_test)
 
 # Save dictionary atoms as images
-mod.dimagesave((28, 28), 'mnist')
+modl1.dimagesave((28, 28), 'mnist')
 
 print 'Run of MNIST.py is complete!'
 
