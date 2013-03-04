@@ -42,13 +42,15 @@ class AdaDictL2(AdapDict):
         '''
         # compute coefficients
         alpha = self.sparsecode(x)
+
         # accuracy of fit:
         recon_err = (np.linalg.norm(x - np.dot(self._D, alpha)) \
                 /(np.linalg.norm(x)+10**-6))
         start_err_bonus = max(0,(DICT_SLOWDOWN - self._natoms + 0.0) / DICT_SLOWDOWN)
         #recon_err -= start_err_bonus/10
+
         # If the coding is not good enough, add the x to dictionary
-        if recon_err > self_acc and self._natoms < DICT_MAX_ATOMS:
+        if recon_err > self._acc and self._natoms < DICT_MAX_ATOMS:
             self.appendtoD(x)
         # else update the dictionary
         else:
@@ -175,7 +177,7 @@ X = X['X'].T
 y = y['y'].T
 dim = X.shape[1]
 
-ad = AdaDictL2(dim, 0.99, 'lasso', 0.1)
+ad = AdaDictL2(dim, 0.5, 'kl', 0.1)
 
 print ad
 

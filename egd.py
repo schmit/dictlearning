@@ -34,6 +34,7 @@ def egd(D, x, l):
     for (i, elem) in enumerate(alpha):
         if abs(elem) < threshold:
             alpha[i] = 0
+    alpha = np.squeeze(alpha)
     return alpha
 
 def L(d, x, w, l):

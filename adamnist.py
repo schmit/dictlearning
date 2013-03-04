@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.io as sio
-import adapdict
+import adadictl2
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from multiOGD import *
@@ -48,10 +48,10 @@ y_test = mnist_test['ytest']
 dim = X_train.shape[1]
 
 ## Dictionary
-mod = adapdict.AdapDict(dim, DICT_ACC, DICT_FIT, DICT_REG)
+mod = adadictl2.AdaDictL2(dim, DICT_ACC, DICT_FIT, DICT_REG)
 
 # Train model
-mod.batchtrain(X_train)
+mod.batchtrain(X_train[range(5000)])
 
 # Find reconstructions
 alphas_train = mod.batchreconstruction(X_train, \
