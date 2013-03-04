@@ -7,6 +7,8 @@ import os
 import scipy.io as sio
 import utility
 from math import sqrt
+import scipy.io as sio
+import egd
 
 # Constants regarding dictionary update
 # Move later
@@ -97,8 +99,9 @@ class AdapDict:
                 return clf.coef_
         elif sparse_method == "kl":
             def fn(D, x, par):
-                pass
-        self.sparse_method_fn = fn
+                alpha = egd.egd(D,x,par)
+                return alpha
+        self.method_fn = fn
 
     def train(self, x):
         '''
@@ -106,7 +109,6 @@ class AdapDict:
         '''
         # compute coefficients
         alpha = self.sparsecode(x)
-
         # accuracy of fit:
         recon_err = (np.linalg.norm(x - np.dot(self.__D, alpha)) \
                 /(np.linalg.norm(x)+10**-6))
@@ -150,7 +152,7 @@ class AdapDict:
         '''
         alpha = self.sparsecode(x)
         # reconstruction
-        recon = np.dot(self.__D, alpha)
+        recon = np.squeeze(np.dot(self.__D, alpha))
         recon_err = np.linalg.norm(x - recon) / np.linalg.norm(x)
         return alpha, recon_err
 
@@ -175,8 +177,9 @@ class AdapDict:
         for j in range(n):
             recon = self.reconstruction(X[j, :])
             # extract encoding
-            alpha_j = recon[0]
+            alpha_j = np.squeeze(recon[0])
             # add encoding to matrix
+
             alphas[j, :] = alpha_j
             sum_nnz += np.linalg.norm(alpha_j, 0)
             sum_err += recon[1]
@@ -354,7 +357,7 @@ X = X['X'].T
 y = y['y'].T
 dim = X.shape[1]
 
-ad = AdapDict(dim,0.5, 'lasso', 0.5)
+ad = AdapDict(dim, 0.5, 'kl', 0.5)
 
 print ad
 
