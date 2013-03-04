@@ -4,6 +4,7 @@ import time
 from sklearn import linear_model
 import matplotlib.pyplot as plt
 import os
+import scipy.io as sio
 import utility
 from math import sqrt
 
@@ -25,10 +26,11 @@ DICT_SLOWDOWN = 100
 
 
 class AdapDict:
-    def __init__(self, dimension, accuracy, method, method_parameters):
-        methods = ['linreg', 'lars', 'lassolars', 'lasso', 'kl']
+    def __init__(self, dimension, accuracy, sparse_method, sparse_parameters):
+        sparse_methods = ['linreg', 'lars', 'lassolars', 'lasso', 'kl']
         # check the method is implemented
-        assert(method in methods)
+        assert(sparse_method in sparse_methods, 'Sparse coding method not available')
+
         assert(accuracy < 1)
         assert(accuracy > 0)
 
@@ -38,16 +40,16 @@ class AdapDict:
         self.__acc = accuracy
         # initialization method for dictionary
 
+        # Sparse coding method
+        self.__sparse_par = sparse_parameters
+        self.__sparse_name = sparse_method
+        self.initcodingmethod(sparse_method, sparse_parameters)
+
         # Dictionary matrix, start with all ones
         self.__D = sqrt(1.0/self.__dim) * np.ones((self.__dim, 1))
         # A and B as defined on page 25 of Mairal
         self.__A = np.zeros((self.__natoms, self.__natoms))
         self.__B = np.zeros((self.__dim, self.__natoms))
-
-        # Sparse coding method
-        self.__method_par = method_parameters
-        self.__method_name = method
-        self.initcodingmethod(method, method_parameters)
 
         # Extras
         self.__ntrained = 0
@@ -60,9 +62,9 @@ class AdapDict:
         string += "Number of atoms: %d\n" % (self.__natoms)
         return string
 
-    def initcodingmethod(self, method, method_parameters):
+    def initcodingmethod(self, sparse_method, sparse_parameters):
         '''
-        Method for fitting the coefficients
+        sparse_method for fitting the coefficients
 
         For dictionaries with large number of atoms, lars is fastest.
         larslasso performs very slow with large number of atoms.
@@ -71,32 +73,32 @@ class AdapDict:
         while lasso and larslasso take in the regularization parameter lambda
         '''
 
-        if method == 'linreg':
+        if sparse_method == 'linreg':
             def fn(D, x, par):
                 return np.linalg.lstsq(D, x)[0]
-        elif method == 'lars':
+        elif sparse_method == 'lars':
             def fn(D, x, par):
-                clf = linear_model.Lars(fit_intercept=False, fit_path=True, \
+                clf = linear_model.Lars(fit_intercept=False, fit_path=True,
                     n_nonzero_coefs = par)
                 clf.fit(D, x)
                 return clf.coef_
-        elif method == 'lassolars':
+        elif sparse_method == 'lassolars':
             def fn(D, x, par):
-                clf = linear_model.LassoLars(alpha=method_parameters, \
-                    fit_intercept = False, fit_path=False, \
+                clf = linear_model.LassoLars(alpha=sparse_parameters,
+                    fit_intercept = False, fit_path=False, 
                     normalize=False)
                 clf.fit(D, x)
                 return clf.coef_[0]
-        elif method == 'lasso':
+        elif sparse_method == 'lasso':
             def fn(D, x, par):
-                clf = linear_model.Lasso(alpha=method_parameters, \
+                clf = linear_model.Lasso(alpha=sparse_parameters,
                     fit_intercept=False)
                 clf.fit(D, x)
                 return clf.coef_
-        elif method == "kl":
+        elif sparse_method == "kl":
             def fn(D, x, par):
                 pass
-        self.method_fn = fn
+        self.sparse_method_fn = fn
 
     def train(self, x):
         '''
@@ -161,7 +163,6 @@ class AdapDict:
         time_start = time.time()
 
         n = X.shape[0]
-
         # sum of non-zero coefficients
         sum_nnz = 0.0
         # sum of errors
@@ -190,8 +191,8 @@ class AdapDict:
             (avg_err)
 
         # save encoding to matlab file for later use
-        folder = "./encodings/%s/%s/" % (dataname, self.__method_name)
-        filename = "%r_%r" % (self.__natoms, int(self.__method_par * 100000))
+        folder = "./encodings/%s/%s/" % (dataname, self.__sparse_name)
+        filename = "%r_%r" % (self.__natoms, int(self.__sparse_par * 100000))
         utility.savematrix(alphas, folder, filename)
         # timing
         print "Reconstructed sample in %0.2f seconds" % \
@@ -204,7 +205,7 @@ class AdapDict:
         Subroutine of train
         Find a sparse coding of x in terms of the columns of the dictionary
         '''
-        a = self.method_fn(self.__D, x, self.__method_par)
+        a = self.sparse_method_fn(self.__D, x, self.__sparse_par)
         return a
 
     def updateAB(self, x, alpha):
@@ -316,8 +317,8 @@ class AdapDict:
         print "=== Save figures ==="
 
         # Make directory if it does not exist
-        folder = "./images/%s/%s/%d_%d/" % (imname, self.__method_name,
-            self.__natoms, int(self.__method_par * 100000))
+        folder = "./images/%s/%s/%d_%d/" % (imname, self.__sparse_name,
+            self.__natoms, int(self.__sparse_par * 100000))
         d = os.path.dirname(folder)
         if not os.path.exists(d):
             os.makedirs(d)
@@ -343,7 +344,7 @@ class AdapDict:
     def getnatoms(self):
         return self.__natoms
 
-'''
+
 train = "./matlab/X_test.mat"
 test = "./matlab/y_test.mat"
 # load data
@@ -362,4 +363,4 @@ ad.batchreconstruction(y, 'ytest_n')
 
 print ad
 ad.dimagesave((5,2), 'test')
-'''
+
