@@ -347,7 +347,7 @@ class AdapDict:
     def getnatoms(self):
         return self.__natoms
 
-
+'''
 train = "./matlab/X_test.mat"
 test = "./matlab/y_test.mat"
 # load data
@@ -357,7 +357,7 @@ X = X['X'].T
 y = y['y'].T
 dim = X.shape[1]
 
-ad = AdapDict(dim, 0.5, 'lasso', 0.5)
+ad = AdapDict(dim, 0.5, 'kl', 0.1)
 
 print ad
 
@@ -366,4 +366,4 @@ ad.batchreconstruction(y, 'ytest_n')
 
 print ad
 ad.dimagesave((5,2), 'test')
-
+'''
