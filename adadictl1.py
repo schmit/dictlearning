@@ -9,6 +9,7 @@ import utility
 from math import sqrt
 import scipy.io as sio
 import egd
+import oiadmm
 from adapdict import AdapDict
 
 # Constants regarding dictionary update
@@ -31,8 +32,9 @@ DICT_SLOWDOWN = 100
 class AdaDictL1(AdapDict):
     def __init__(self, dimension, accuracy, sparse_method, sparse_parameters):
         super(AdaDictL1, self).__init__(dimension, accuracy, sparse_method, sparse_parameters)
+        self._L = self._D
 
-    def train(self, x):
+    def train(self, x, beta=5):
         '''
         Train the dictionary on a single observation
         '''
@@ -48,9 +50,12 @@ class AdaDictL1(AdapDict):
             self.appendtoD(x)
         # else update the dictionary
         else:
-            ## IMPLEMENT UPDATE
-            pass
-
+            # IOADMM update
+            tau = 1.0/(2*np.dot(alpha,alpha))
+            self._D, self._L = oiadmm.OIADMM(self._D, alpha, x, self._L, beta, tau)
+            # normalize columns
+            for j in range(self._natoms):
+                self._D[:,j] = self._D[:,j] / np.linalg.norm(self._D[:,j], 1)
         # remove near duplications from D
         if self._natoms > 0:
             # only remove when there are enough atoms
@@ -93,7 +98,7 @@ X = X['X'].T
 y = y['y'].T
 dim = X.shape[1]
 
-ad = AdaDictL1(dim, 0.5, 'kl', 0.1)
+ad = AdaDictL1(dim, 0.5, 'lasso', 0.1)
 
 print ad
 

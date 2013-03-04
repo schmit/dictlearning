@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.io as sio
+import adadictl1
 import adadictl2
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -49,22 +50,29 @@ dim = X_train.shape[1]
 
 ## Dictionary
 mod = adadictl2.AdaDictL2(dim, DICT_ACC, DICT_FIT, DICT_REG)
+modl1 = adadictl1.AdaDictL1(dim, DICT_ACC, DICT_FIT, DICT_REG)
 
 # Train model
+modl1.batchtrain(X_train[range(5000)])
 mod.batchtrain(X_train[range(5000)])
 
 # Find reconstructions
-alphas_train = mod.batchreconstruction(X_train, \
+alphas_train = modl1.batchreconstruction(X_train[range(5000)], \
     'mnist_train')
-alphas_test = mod.batchreconstruction(X_test, \
+alphas_test = modl1.batchreconstruction(X_test[range(5000)], \
+    'mnist_test')
+
+alphas_train = mod.batchreconstruction(X_train[range(5000)], \
+    'mnist_train')
+alphas_test = mod.batchreconstruction(X_test[range(5000)], \
     'mnist_test')
 
 print mod
 
 ## Classification
 ogd_m = multiOGD(10, mod.getnatoms(), MOD_REG)
-ogd_m.train(alphas_train, y_train)
-ogd_m.predict(alphas_test, y_test)
+ogd_m.train(alphas_train, y_train[range(5000)])
+ogd_m.predict(alphas_test, y_test[range(5000)])
 
 # Save dictionary atoms as images
 mod.dimagesave((28, 28), 'mnist')

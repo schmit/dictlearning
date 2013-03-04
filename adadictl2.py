@@ -167,7 +167,7 @@ class AdaDictL2(AdapDict):
 
             self._natoms -= 1
 
-
+'''
 train = "./matlab/X_test.mat"
 test = "./matlab/y_test.mat"
 # load data
@@ -186,4 +186,4 @@ ad.batchreconstruction(y, 'ytest_n')
 
 print ad
 ad.dimagesave((5,2), 'test')
-
+'''
