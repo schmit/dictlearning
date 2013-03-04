@@ -31,7 +31,7 @@ class AdapDict:
     def __init__(self, dimension, accuracy, sparse_method, sparse_parameters):
         sparse_methods = ['linreg', 'lars', 'lassolars', 'lasso', 'kl']
         # check the method is implemented
-        assert(sparse_method in sparse_methods, 'Sparse coding method not available')
+        assert(sparse_method in sparse_methods)
 
         assert(accuracy < 1)
         assert(accuracy > 0)
@@ -101,7 +101,7 @@ class AdapDict:
             def fn(D, x, par):
                 alpha = egd.egd(D,x,par)
                 return alpha
-        self.method_fn = fn
+        self.sparse_method_fn = fn
 
     def train(self, x):
         '''
@@ -357,7 +357,7 @@ X = X['X'].T
 y = y['y'].T
 dim = X.shape[1]
 
-ad = AdapDict(dim, 0.5, 'kl', 0.5)
+ad = AdapDict(dim, 0.5, 'lasso', 0.5)
 
 print ad
 
