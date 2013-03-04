@@ -13,7 +13,7 @@ def egd(D, x, l):
     tol = 1e-3
     max_its = 100
     eta = 0.01
-    threshold_coef = 0.5
+    threshold_coef = 0.0
     
     B = np.append(D,-D,axis=1)
     w = np.ones((B.shape[1],1))

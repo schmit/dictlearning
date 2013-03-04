@@ -28,15 +28,9 @@ DICT_MAX_CORR = 0.98
 DICT_SLOWDOWN = 100
 
 
-class AdaDictL2(AdapDict):
+class AdaDictL1(AdapDict):
     def __init__(self, dimension, accuracy, sparse_method, sparse_parameters):
-        super(AdaDictL2, self).__init__(dimension, accuracy, sparse_method, sparse_parameters)
-
-        # Dictionary matrix, start with all ones
-        self.__D = sqrt(1.0/self.__dim) * np.ones((self.__dim, 1))
-        # A and B as defined on page 25 of Mairal
-        self.__A = np.zeros((self.__natoms, self.__natoms))
-        self.__B = np.zeros((self.__dim, self.__natoms))
+        super(AdaDictL1, self).__init__(dimension, accuracy, sparse_method, sparse_parameters)
 
     def train(self, x):
         '''
@@ -45,12 +39,12 @@ class AdaDictL2(AdapDict):
         # compute coefficients
         alpha = self.sparsecode(x)
         # accuracy of fit:
-        recon_err = (np.linalg.norm(x - np.dot(self.__D, alpha)) \
+        recon_err = (np.linalg.norm(x - np.dot(self._D, alpha)) \
                 /(np.linalg.norm(x)+10**-6))
-        start_err_bonus = max(0,(DICT_SLOWDOWN - self.__natoms + 0.0) / DICT_SLOWDOWN)
+        start_err_bonus = max(0,(DICT_SLOWDOWN - self._natoms + 0.0) / DICT_SLOWDOWN)
         recon_err -= start_err_bonus/10
         # If the coding is not good enough, add the x to dictionary
-        if recon_err > self.__acc and self.__natoms < DICT_MAX_ATOMS:
+        if recon_err > self._acc and self._natoms < DICT_MAX_ATOMS:
             self.appendtoD(x)
         # else update the dictionary
         else:
@@ -58,36 +52,36 @@ class AdaDictL2(AdapDict):
             pass
 
         # remove near duplications from D
-        if self.__natoms > 0:
+        if self._natoms > 0:
             # only remove when there are enough atoms
             self.removeduplicatesD()
 
         # increase counter of number of samples trained
-        self.__ntrained += 1
+        self._ntrained += 1
 
     def appendtoD(self, x):
         col = x.reshape((x.shape[0], 1)) / (np.linalg.norm(x) + 10**-8)
-        self.__D = np.append(self.__D, col, axis=1)
-        self.__natoms += 1
+        self._D = np.append(self._D, col, axis=1)
+        self._natoms += 1
 
     def removeduplicatesD(self):
         '''
         Possibly merge columns if they are too similar
         '''
-        sim = abs(np.dot(self.__D.T, self.__D)) - np.identity(self.__natoms)
+        sim = abs(np.dot(self._D.T, self._D)) - np.identity(self._natoms)
 
         most_correlated = np.unravel_index(np.argmax(sim), sim.shape)
-        if (sim[most_correlated] > DICT_MAX_CORR) and (self.__natoms-1 not in most_correlated):
+        if (sim[most_correlated] > DICT_MAX_CORR) and (self._natoms-1 not in most_correlated):
             # index where we will merge
             merger = most_correlated[0]
             # index that will be removed
             remover = most_correlated[1]
 
             # Merge in D
-            self.__D[:, merger] = 0.5 * self.__D[:, merger] \
-                + 0.5 * self.__D[:, remover]
-            self.__D = np.delete(self.__D, remover, 1)
-            self.__natoms -= 1
+            self._D[:, merger] = 0.5 * self._D[:, merger] \
+                + 0.5 * self._D[:, remover]
+            self._D = np.delete(self._D, remover, 1)
+            self._natoms -= 1
 
 
 train = "./matlab/X_test.mat"
@@ -99,7 +93,7 @@ X = X['X'].T
 y = y['y'].T
 dim = X.shape[1]
 
-ad = AdaDictL2(dim, 0.5, 'kl', 0.1)
+ad = AdaDictL1(dim, 0.5, 'kl', 0.1)
 
 print ad
 
