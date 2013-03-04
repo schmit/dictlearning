@@ -15,6 +15,7 @@ from adapdict import *
 
 class AdaDictL1(AdapDict):
     def __init__(self, dimension, accuracy, sparse_method, sparse_parameters):
+        print "\t\t L1 Loss Dictionary"
         super(AdaDictL1, self).__init__(dimension, accuracy, sparse_method, sparse_parameters)
         self._L = self._D
 

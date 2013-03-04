@@ -15,6 +15,7 @@ from adapdict import *
 class AdaDictL2(AdapDict):
     def __init__(self, dimension, accuracy, sparse_method, sparse_parameters):
         super(AdaDictL2, self).__init__(dimension, accuracy, sparse_method, sparse_parameters)
+        print "\t\t L2 Loss Dictionary"
 
         # A and B as defined on page 25 of Mairal
         self._A = np.zeros((self._natoms, self._natoms))
