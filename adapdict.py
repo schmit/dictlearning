@@ -49,6 +49,7 @@ class AdapDict(object):
 
         # Dictionary matrix, start with all ones
         self._D = sqrt(1.0/self._dim) * np.ones((self._dim, 1))
+	self._Dloss = "none"
 
         # Extras
         self._ntrained = 0
@@ -164,7 +165,7 @@ class AdapDict(object):
             (avg_err)
 
         # save encoding to matlab file for later use
-        folder = "./encodings/%s/%s/" % (dataname, self._sparse_name)
+        folder = "./encodings/%s/%s/%s/" % (dataname, self._Dloss, self._sparse_name)
         filename = "%r_%r" % (self._natoms, int(self._sparse_par * 100000))
         utility.savematrix(alphas, folder, filename)
         # timing
@@ -217,7 +218,7 @@ class AdapDict(object):
         print "=== Save figures ==="
 
         # Make directory if it does not exist
-        folder = "./images/%s/%s/%d_%d/" % (imname, self._sparse_name,
+        folder = "./images/%s/%s/%s/%d_%d/" % (imname, self._Dloss, self._sparse_name,
             self._natoms, int(self._sparse_par * 100000))
         d = os.path.dirname(folder)
         if not os.path.exists(d):

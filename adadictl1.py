@@ -19,6 +19,9 @@ class AdaDictL1(AdapDict):
         super(AdaDictL1, self).__init__(dimension, accuracy, sparse_method, sparse_parameters)
         self._L = self._D
 
+	# Set name of dictionary loss function
+	self._Dloss = "L1"
+
     def train(self, x, beta=0.5):
         '''
         Train the dictionary on a single observation

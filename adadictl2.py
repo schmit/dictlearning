@@ -21,6 +21,9 @@ class AdaDictL2(AdapDict):
         self._A = np.zeros((self._natoms, self._natoms))
         self._B = np.zeros((self._dim, self._natoms))
 
+	# Set name of loss on dictionary
+	self._Dloss = "L2"
+
     def train(self, x):
         '''
         Train the dictionary on a single observation
