@@ -9,6 +9,7 @@ import utility
 from math import sqrt
 import scipy.io as sio
 import egd
+import glmnet
 
 # Constants regarding dictionary update
 # Move later
@@ -24,12 +25,12 @@ DICT_MAX_CORR = 0.8
 
 # Accepts lower precision for the first observations
 # Select number here
-DICT_SLOWDOWN = 1000
+DICT_SLOWDOWN = 6000
 
 
 class AdapDict(object):
     def __init__(self, dimension, accuracy, sparse_method, sparse_parameters):
-        sparse_methods = ['linreg', 'lars', 'lassolars', 'lasso', 'kl']
+        sparse_methods = ['linreg', 'lars', 'lassolars', 'lasso', 'kl', 'glmnet']
         # check the method is implemented
         assert(sparse_method in sparse_methods)
 
@@ -98,6 +99,11 @@ class AdapDict(object):
             def fn(D, x, par):
                 alpha = egd.egd(D,x,par)
                 return alpha
+        elif sparse_method == "glmnet":
+            def fn(D, x, par):
+                enet = ElasticNet(alpha=par)
+                enet.fit(D, x)
+                return enet.coef_
         self.sparse_method_fn = fn
 
     def train(self, x):
