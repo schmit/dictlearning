@@ -51,21 +51,23 @@ dim = X_train.shape[1]
 ## Dictionary
 modl1 = adadictl1.AdaDictL1(dim, DICT_ACC, DICT_FIT, DICT_REG)
 
+n_obs = 2000
+
 # Train model
-modl1.batchtrain(X_train)
+modl1.batchtrain(X_train[range(n_obs)])
 
 # Find reconstructions
-alphas_train = modl1.batchreconstruction(X_train,
+alphas_train = modl1.batchreconstruction(X_train[range(n_obs)],
     'mnist_train')
-alphas_test = modl1.batchreconstruction(X_test,
+alphas_test = modl1.batchreconstruction(X_test[range(n_obs)],
     'mnist_test')
 
 print modl1
 
 ## Classification
 ogd_m = multiOGD(10, modl1.getnatoms(), MOD_REG)
-ogd_m.train(alphas_train, y_train)
-ogd_m.predict(alphas_test, y_test)
+ogd_m.train(alphas_train, y_train[range(n_obs)])
+ogd_m.predict(alphas_test, y_test[range(n_obs)])
 
 # Save dictionary atoms as images
 modl1.dimagesave((28, 28), 'mnist')
