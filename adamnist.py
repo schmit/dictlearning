@@ -33,7 +33,6 @@ MOD_REG = float(params.mod_reg)
 
 print params
 
-
 def showimage(x):
     img = np.reshape(x, (28, 28), order = 'F')
     imgplot = plt.imshow(img)
@@ -50,27 +49,70 @@ dim = X_train.shape[1]
 
 ## Dictionary
 modl1 = adadictl1.AdaDictL1(dim, DICT_ACC, DICT_FIT, DICT_REG)
+modl2 = adadictl2.AdaDictL2(dim, DICT_ACC, DICT_FIT, DICT_REG)
 
-n_obs = 2000
+n_obs = 1000
 
 # Train model
 modl1.batchtrain(X_train[range(n_obs)])
 
 # Find reconstructions
-alphas_train = modl1.batchreconstruction(X_train[range(n_obs)],
+al1_train = modl1.batchreconstruction(X_train[range(n_obs)],
     'mnist_train')
-alphas_test = modl1.batchreconstruction(X_test[range(n_obs)],
+al1_test = modl1.batchreconstruction(X_test,
     'mnist_test')
 
-print modl1
+
 
 ## Classification
-ogd_m = multiOGD(10, modl1.getnatoms(), MOD_REG)
-ogd_m.train(alphas_train, y_train[range(n_obs)])
-ogd_m.predict(alphas_test, y_test[range(n_obs)])
+ogd_m_l1 = multiOGD(10, modl1.getnatoms(), MOD_REG)
+ogd_m_l1.seteta(0.001)
+ogd_m_l1.train(al1_train , y_train[range(n_obs)])
+ogd_m_l1.seteta(0.001)
+ogd_m_l1.train(al1_train , y_train[range(n_obs)])
+ogd_m_l1.seteta(0.0001)
+ogd_m_l1.train(al1_train , y_train[range(n_obs)])
+ogd_m_l1.seteta(0.00001)
+ogd_m_l1.train(al1_train , y_train[range(n_obs)])
+ogd_m_l1.train(al1_train , y_train[range(n_obs)])
+ogd_m_l1.seteta(0.000001)
+ogd_m_l1.train(al1_train , y_train[range(n_obs)])
+ogd_m_l1.train(al1_train , y_train[range(n_obs)])
+ogd_m_l1.train(al1_train , y_train[range(n_obs)])
+
+ogd_m_l1.predict(al1_test, y_test)
+
+
+# Same for L2
+modl2.batchtrain(X_train[range(n_obs)])
+
+al2_train = modl2.batchreconstruction(X_train[range(n_obs)],
+    'mnist_train')
+al2_test = modl2.batchreconstruction(X_test,
+    'mnist_test')
+
+## Classification
+ogd_m_l2 = multiOGD(10, modl2.getnatoms(), MOD_REG)
+ogd_m_l2.seteta(0.001)
+ogd_m_l2.train(al2_train , y_train[range(n_obs)])
+ogd_m_l2.seteta(0.001)
+ogd_m_l2.train(al2_train , y_train[range(n_obs)])
+ogd_m_l2.seteta(0.0001)
+ogd_m_l2.train(al2_train , y_train[range(n_obs)])
+ogd_m_l2.seteta(0.00001)
+ogd_m_l2.train(al2_train , y_train[range(n_obs)])
+ogd_m_l2.train(al2_train , y_train[range(n_obs)])
+ogd_m_l2.seteta(0.000001)
+ogd_m_l2.train(al2_train , y_train[range(n_obs)])
+ogd_m_l2.train(al2_train , y_train[range(n_obs)])
+ogd_m_l2.train(al2_train , y_train[range(n_obs)])
+
+ogd_m_l2.predict(al2_test, y_test)
 
 # Save dictionary atoms as images
-modl1.dimagesave((28, 28), 'mnist')
+modl1.dimagesave((28, 28), 'mnistl1')
+modl2.dimagesave((28, 28), 'mnistl2')
+
 
 print 'Run of MNIST.py is complete!'
 

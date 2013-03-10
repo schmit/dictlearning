@@ -19,12 +19,12 @@ DICT_UPD_MAX_ITR = 50
 # Dictionary max itr seems to be never reached, but a nice fail safe
 
 # When to merge atoms when they are too similar
-DICT_MAX_ATOMS = 500
-DICT_MAX_CORR = 0.8
+DICT_MAX_ATOMS = 780
+DICT_MAX_CORR = 0.85
 
 # Accepts lower precision for the first observations
 # Select number here
-DICT_SLOWDOWN = 6000
+DICT_SLOWDOWN = 5000
 
 
 class AdapDict(object):
