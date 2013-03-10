@@ -31,23 +31,37 @@ def OIADMM(D, A, X, L, beta, tau):
 
 def ADMMforX(A, P, lamb, gamma, phi, kappa):
 
+    #print 'NEW CALL'
+    P = np.expand_dims(P, 1)
     X = np.zeros((A.shape[1], 1))
+    #print X.shape
+    #print A.shape
     E = P
+    #print E.shape
     rho = np.zeros(P.shape)
 
-    max_its = 1000
+    max_its = 50
     its = 0
     error = 1000
-    tol = 1e-6
+    tol = 1e-2
     while(its < max_its and error > tol):
         its = its+1
         AX = np.dot(A, X)
         rhophi = rho / phi
-        E = shrinkage(P - AX + rhophi, 1 / phi)
+
+        E = shrinkage(np.squeeze(P - AX + rhophi), 1.0 / phi)
+        E = np.expand_dims(E, 1)
 
         inner = AX + E - P - rhophi
+        #print inner.shape
         G = np.dot(A.transpose(), inner)
-        X = np.max(X - kappa*G - lamb * kappa / phi, 0)
+        #print G.shape
+        Xnew = np.maximum(X - kappa*G - lamb * kappa / phi, 0.0)
+        error = np.linalg.norm(Xnew-X, 2)/(np.linalg.norm(Xnew, 2)+10**-6)
+        X = Xnew
+        #print X.shape
+        #print A.shape
         rho = rho + gamma * phi * (P - np.dot(A, X) - E)
-        error = np.norm(E)
-    return X
+    #print np.squeeze(X)
+    #print X.shape
+    return np.squeeze(X)

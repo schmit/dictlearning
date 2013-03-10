@@ -9,6 +9,7 @@ import utility
 from math import sqrt
 import scipy.io as sio
 import egd
+from oiadmm import ADMMforX as admm
 
 # Constants regarding dictionary update
 # Move later
@@ -29,7 +30,7 @@ DICT_SLOWDOWN = 6000
 
 class AdapDict(object):
     def __init__(self, dimension, accuracy, sparse_method, sparse_parameters):
-        sparse_methods = ['linreg', 'lars', 'lassolars', 'lasso', 'kl']
+        sparse_methods = ['linreg', 'lars', 'lassolars', 'lasso', 'kl', 'admm']
         # check the method is implemented
         assert(sparse_method in sparse_methods)
 
@@ -49,7 +50,7 @@ class AdapDict(object):
 
         # Dictionary matrix, start with all ones
         self._D = sqrt(1.0/self._dim) * np.ones((self._dim, 1))
-	self._Dloss = "none"
+        self._Dloss = "none"
 
         # Extras
         self._ntrained = 0
@@ -78,26 +79,35 @@ class AdapDict(object):
         elif sparse_method == 'lars':
             def fn(D, x, par):
                 clf = linear_model.Lars(fit_intercept=False, fit_path=True,
-                    n_nonzero_coefs = par)
+                                        n_nonzero_coefs=par)
                 clf.fit(D, x)
                 return clf.coef_
         elif sparse_method == 'lassolars':
             def fn(D, x, par):
                 clf = linear_model.LassoLars(alpha=sparse_parameters,
-                    fit_intercept = False, fit_path=False, 
-                    normalize=False)
+                                             fit_intercept=False, fit_path=False,
+                                             normalize=False)
                 clf.fit(D, x)
                 return clf.coef_[0]
         elif sparse_method == 'lasso':
             def fn(D, x, par):
                 clf = linear_model.Lasso(alpha=sparse_parameters,
-                    fit_intercept=False)
+                                         fit_intercept=False)
                 clf.fit(D, x)
                 return clf.coef_
         elif sparse_method == "kl":
             def fn(D, x, par):
-                alpha = egd.egd(D,x,par)
+                alpha = egd.egd(D, x, par)
                 return alpha
+        elif sparse_method == "admm":
+            def fn(D, x, par):
+                gamma = 1.89
+                phi = 0.1
+                kappa = 1.0/(np.linalg.norm(D)**2+1e-6)
+                alpha = admm(D, x, par, gamma, phi, kappa)
+                #print alpha
+                return alpha
+
         self.sparse_method_fn = fn
 
     def train(self, x):
