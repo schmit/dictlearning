@@ -51,7 +51,8 @@ dim = X_train.shape[1]
 modl1 = adadictl1.AdaDictL1(dim, DICT_ACC, DICT_FIT, DICT_REG)
 modl2 = adadictl2.AdaDictL2(dim, DICT_ACC, DICT_FIT, DICT_REG)
 
-n_obs = 1000
+n_obs = 600
+
 
 # Train model
 modl1.batchtrain(X_train[range(n_obs)])

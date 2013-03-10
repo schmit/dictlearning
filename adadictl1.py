@@ -57,24 +57,6 @@ class AdaDictL1(AdapDict):
         self._D = np.append(self._D, col, axis=1)
         self._natoms += 1
 
-    def removeduplicatesD(self):
-        '''
-        Possibly merge columns if they are too similar
-        '''
-        sim = abs(np.dot(self._D.T, self._D)) - np.identity(self._natoms)
-
-        most_correlated = np.unravel_index(np.argmax(sim), sim.shape)
-        if (sim[most_correlated] > DICT_MAX_CORR) and (self._natoms-1 not in most_correlated):
-            # index where we will merge
-            merger = most_correlated[0]
-            # index that will be removed
-            remover = most_correlated[1]
-
-            # Merge in D
-            self._D[:, merger] = 0.5 * self._D[:, merger] \
-                + 0.5 * self._D[:, remover]
-            self._D = np.delete(self._D, remover, 1)
-            self._natoms -= 1
 
 '''
 train = "./matlab/X_test.mat"

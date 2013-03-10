@@ -21,7 +21,7 @@ DICT_UPD_MAX_ITR = 50
 
 # When to merge atoms when they are too similar
 DICT_MAX_ATOMS = 780
-DICT_MAX_CORR = 0.85
+DICT_MAX_CORR = 0.5
 
 # Accepts lower precision for the first observations
 # Select number here
@@ -124,6 +124,7 @@ class AdapDict(object):
             if (j + 1) % (xrange / 10) == 0:
                 print "Iteration %d" % (j + 1)
                 print "Number of atoms: %d" % self._natoms
+                print "Avg Fro-Norm of Dictionary: %0.2f" % (np.linalg.norm(self._D, 'fro')/self._natoms)
             self.train(X[j, :])
         print "Trained sample in %0.2f seconds" % (time.time() - time_start)
 
@@ -165,7 +166,7 @@ class AdapDict(object):
             sum_nnz += np.linalg.norm(alpha_j, 0)
             sum_err += recon[1]
             # print iteration number
-            if (j + 1) % 10000 == 0:
+            if (j + 1) % (n/10) == 0:
                 print "Iteration %d" % (j + 1)
         avg_nnz = sum_nnz / n
         avg_err = sum_err / n
@@ -211,6 +212,10 @@ class AdapDict(object):
             merger = most_correlated[0]
             # index that will be removed
             remover = most_correlated[1]
+
+            corr = np.dot(self._D[:,merger],self._D[:,remover])
+            if corr < 0:
+                print "Warning: Correlation is negative!"
 
             # Merge in D
             self._D[:, merger] = 0.5 * self._D[:, merger] \
