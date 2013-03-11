@@ -63,11 +63,11 @@ def run(n_obs, loss, reg, amount):
     dictmod.batchtrain(X_train[range(n_obs)])
 
     # Find reconstructions
-    al1_train = dictmod.batchreconstruction(X_train[range(n_obs)],
+    al1_train, err = dictmod.batchreconstruction(X_train[range(n_obs)],
         'mnist_train')
-    al1_test = dictmod.batchreconstruction(X_test,
+    al1_test, err = dictmod.batchreconstruction(X_test,
         'mnist_test')
-
+    print dictmod.getnatoms()
     ## Classification
     ogd = multiOGD(10, dictmod.getnatoms(), 0.001)
     ogd.train(al1_train , y_train[range(n_obs)])
@@ -91,7 +91,7 @@ def run(n_obs, loss, reg, amount):
 
     ogd.predict(al1_test, y_test)
     imagenm = "mnist_%d" % n_obs
-    dictmod.dimagesave((28,28), imagenm)
+    #dictmod.dimagesave((28,28), imagenm)
 
     print 'Run of MNIST.py is complete!\n\n'
 
@@ -100,6 +100,98 @@ Atoms: 200
 Reg: 0.05  too much
 '''
 
+
+N_OBS = 30
+
+print "\n\n\n\n50 observations "
+
+print "\tL1 \tLASSO \t0.00005"
+run(N_OBS, 'l1', 'lasso', 0.00005)
+print "\tL2 \tLASSO \t0.0005"
+run(N_OBS, 'l2', 'lasso', 0.0005)
+
+print "\tL1 \tKL \t1.0"
+run(N_OBS, 'l1', 'kl', 1.0)
+print "\tL2 \tKL \t1.0"
+run(N_OBS, 'l2', 'kl', 1.0)
+
+print "\tL1 \tNone"
+run(N_OBS, 'l2', 'linreg', 0.00001)
+print "\tL2 \tNone"
+run(N_OBS, 'l1', 'linreg', 0.00001)
+
+N_OBS = 100
+
+print "\n\n\n\n100 observations "
+
+print "\tL1 \tLASSO \t0.00005"
+run(N_OBS, 'l1', 'lasso', 0.00005)
+print "\tL2 \tLASSO \t0.0005"
+run(N_OBS, 'l2', 'lasso', 0.0005)
+
+print "\tL1 \tKL \t1.0"
+run(N_OBS, 'l1', 'kl', 1.0)
+print "\tL2 \tKL \t1.0"
+run(N_OBS, 'l2', 'kl', 1.0)
+
+print "\tL1 \tNone"
+run(N_OBS, 'l2', 'linreg', 0.00001)
+print "\tL2 \tNone"
+run(N_OBS, 'l1', 'linreg', 0.00001)
+
+N_OBS = 300
+print "\n\n\n\n300 observations "
+
+print "\tL1 \tLASSO \t0.00005"
+run(N_OBS, 'l1', 'lasso', 0.00005)
+print "\tL2 \tLASSO \t0.0005"
+run(N_OBS, 'l2', 'lasso', 0.0005)
+
+print "\tL1 \tKL \t1.0"
+run(N_OBS, 'l1', 'kl', 1.0)
+print "\tL2 \tKL \t1.0"
+run(N_OBS, 'l2', 'kl', 1.0)
+
+print "\tL1 \tNone"
+run(N_OBS, 'l2', 'linreg', 0.00001)
+print "\tL2 \tNone"
+run(N_OBS, 'l1', 'linreg', 0.00001)
+
+N_OBS = 1000
+print "\n\n\n\n1000 observations "
+
+print "\tL1 \tLASSO \t0.00005"
+run(N_OBS, 'l1', 'lasso', 0.00005)
+print "\tL2 \tLASSO \t0.0005"
+run(N_OBS, 'l2', 'lasso', 0.0005)
+
+print "\tL1 \tKL \t1.0"
+run(N_OBS, 'l1', 'kl', 1.0)
+print "\tL2 \tKL \t1.0"
+run(N_OBS, 'l2', 'kl', 1.0)
+
+print "\tL1 \tNone"
+run(N_OBS, 'l2', 'linreg', 0.00001)
+print "\tL2 \tNone"
+run(N_OBS, 'l1', 'linreg', 0.00001)
+
+N_OBS = 3000
+print "\n\n\n\n3000 observations "
+
+print "\tL1 \tLASSO \t0.00005"
+run(N_OBS, 'l1', 'lasso', 0.00005)
+print "\tL2 \tLASSO \t0.0005"
+run(N_OBS, 'l2', 'lasso', 0.0005)
+
+print "\tL1 \tKL \t1.0"
+run(N_OBS, 'l1', 'kl', 1.0)
+print "\tL2 \tKL \t1.0"
+run(N_OBS, 'l2', 'kl', 1.0)
+
+print "\tL1 \tNone"
+run(N_OBS, 'l2', 'linreg', 0.00001)
+print "\tL2 \tNone"
+run(N_OBS, 'l1', 'linreg', 0.00001)
 
 N_OBS = 10000
 
