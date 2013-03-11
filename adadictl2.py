@@ -48,7 +48,7 @@ class AdaDictL2(AdapDict):
             self.updateD(DICT_UPD_TOLERANCE, DICT_UPD_MAX_ITR)
 
         # remove near duplications from D
-        if self._natoms > 100:
+        if self._natoms > DICT_MAX_ATOMS-1:
             # only remove when there are enough atoms
             self.removeduplicatesD()
 

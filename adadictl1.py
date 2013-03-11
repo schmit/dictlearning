@@ -45,7 +45,7 @@ class AdaDictL1(AdapDict):
             for j in range(self._natoms):
                 self._D[:,j] = self._D[:,j] / max(10**-6, np.linalg.norm(self._D[:,j], 1))
         # remove near duplications from D
-        if self._natoms > 0:
+        if self._natoms > DICT_MAX_ATOMS - 1:
             # only remove when there are enough atoms
             self.removeduplicatesD()
 
