@@ -48,7 +48,7 @@ class AdaDictL2(AdapDict):
             self.updateD(DICT_UPD_TOLERANCE, DICT_UPD_MAX_ITR)
 
         # remove near duplications from D
-        if self._natoms > 0:
+        if self._natoms > 100:
             # only remove when there are enough atoms
             self.removeduplicatesD()
 
@@ -76,8 +76,9 @@ class AdaDictL2(AdapDict):
         # Algorithm 2 of Mairal p25
         conv = False
         itr = 0
-        norm_D_old = np.linalg.norm(self._D)
+        D_old = self._D
         while not conv:
+            D_old = self._D
             # update the columns of D
             for j in range(self._natoms):
                 # only update columns that are used
@@ -87,9 +88,8 @@ class AdaDictL2(AdapDict):
                     self._D[:, j] = u / max(np.linalg.norm(u), 10**-6)
 
             # check the new norm for D
-            norm_D_new = np.linalg.norm(self._D)
-            norm_diff = abs(norm_D_new - norm_D_old)
-            norm_D_old = norm_D_new
+            norm_diff = np.linalg.norm(self._D - D_old)/np.linalg.norm(self._D)
+
             if norm_diff < tol:
                 conv = True
                 # print the number of iterations till convergence
@@ -129,9 +129,13 @@ class AdaDictL2(AdapDict):
             # index that will be removed
             remover = most_correlated[1]
 
+            corr = np.dot(self._D[:,merger],self._D[:,remover])
+            
+            #print "merger: %d \t remover: %d \t corr: %0.5f \t nr atoms: %d" % (merger, remover, corr, self._natoms)
+
             # Merge in D
             self._D[:, merger] = 0.5 * self._D[:, merger] \
-                + 0.5 * self._D[:, remover]
+                + np.sign(corr) * 0.5 * self._D[:, remover]
             self._D = np.delete(self._D, remover, 1)
 
             # Merge in A
@@ -139,9 +143,9 @@ class AdaDictL2(AdapDict):
 
             # update the merger row and column
             newA[merger, :] = 0.5 * self._A[merger, :] \
-                + 0.5 * self._A[remover, :]
-            newA[:, merger] = 0.5 * self._A[:, merger] \
-                + 0.5 * self._A[:, remover]
+#                + np.sign(corr) * 0.5 * self._A[remover, :]
+            #newA[:, merger] = 0.5 * self._A[:, merger] \
+#                + np.sign(corr) * 0.5 * self._A[:, remover]
             # remove the remover row and column
             newA = np.delete(newA, remover, 0)
             newA = np.delete(newA, remover, 1)
@@ -149,8 +153,8 @@ class AdaDictL2(AdapDict):
             self._A = newA
 
             # Merge in B
-            self._B[:, merger] = 0.5 * self._B[:, merger] \
-                + 0.5 * self._B[:, remover]
+#            self._B[:, merger] = 0.5 * self._B[:, merger] \
+#                + np.sign(corr) * 0.5 * self._B[:, remover]
             self._B = np.delete(self._B, remover, 1)
 
             self._natoms -= 1
