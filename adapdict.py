@@ -183,7 +183,7 @@ class AdapDict(object):
         print "Reconstructed sample in %0.2f seconds" % \
             (time.time() - time_start)
 
-        return alphas
+        return alphas, avg_err
 
     def sparsecode(self, x):
         '''
