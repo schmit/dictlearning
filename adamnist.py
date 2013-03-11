@@ -51,8 +51,8 @@ dim = X_train.shape[1]
 modl1 = adadictl1.AdaDictL1(dim, DICT_ACC, DICT_FIT, DICT_REG)
 modl2 = adadictl2.AdaDictL2(dim, DICT_ACC, DICT_FIT, DICT_REG)
 
-n_obs = 600
-
+n_obs = 60000
+'''
 
 # Train model
 modl1.batchtrain(X_train[range(n_obs)])
@@ -82,7 +82,7 @@ ogd_m_l1.train(al1_train , y_train[range(n_obs)])
 ogd_m_l1.train(al1_train , y_train[range(n_obs)])
 
 ogd_m_l1.predict(al1_test, y_test)
-
+'''
 
 # Same for L2
 modl2.batchtrain(X_train[range(n_obs)])

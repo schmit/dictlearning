@@ -14,13 +14,15 @@ mnist_test = sio.loadmat('./data/mnist/MNIST_test.mat')
 y_train = mnist_train['y']
 y_test = mnist_test['ytest']
 
-enc_train_file = 'encodings/mnist_train/L1/lasso/433_10.mat'
-enc_test_file = 'encodings/mnist_test/L1/lasso/433_10.mat'
+enc_train_file = 'encodings/mnist_train/L2/linreg/126_1.mat'
+enc_test_file = 'encodings/mnist_test/L2/linreg/126_1.mat'
 enc_train = sio.loadmat(enc_train_file)
 enc_test = sio.loadmat(enc_test_file)
 
 A_train = enc_train['alphas'].toarray()
 A_test = enc_test['alphas'].toarray()
+
+print A_train.shape
 
 X_train = mnist_train['X'][0][0][2].transpose()
 X_test = mnist_test['Xtest'].transpose()
@@ -30,13 +32,17 @@ print 'Loading complete'
 print '\t\t\t====== Dictionary ======'
 
 # train model
-dictmod = multiOGD(10, 433, 0.001)
+dictmod = multiOGD(10, 69, 0.001)
 dictmod.train(A_train, y_train)
 dictmod.seteta(0.0005)
 dictmod.train(A_train, y_train)
 dictmod.seteta(0.0001)
 dictmod.train(A_train, y_train)
 dictmod.seteta(0.00001)
+dictmod.train(A_train, y_train)
+dictmod.train(A_train, y_train)
+dictmod.train(A_train, y_train)
+dictmod.seteta(0.000001)
 dictmod.train(A_train, y_train)
 dictmod.train(A_train, y_train)
 dictmod.train(A_train, y_train)
