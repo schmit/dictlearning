@@ -121,7 +121,7 @@ class AdapDict(object):
         time_start = time.time()
         xrange = X.shape[0]
         for j in range(xrange):
-            if (j + 1) % (xrange / 10) == 0:
+            if (j + 1) % (xrange / 5) == 0:
                 print "Iteration %d" % (j + 1)
                 print "Number of atoms: %d" % self._natoms
                 print "Avg Fro-Norm of Dictionary: %0.2f" % (np.linalg.norm(self._D, 'fro')/self._natoms)
@@ -166,7 +166,7 @@ class AdapDict(object):
             sum_nnz += np.linalg.norm(alpha_j, 0)
             sum_err += recon[1]
             # print iteration number
-            if (j + 1) % (n/10) == 0:
+            if (j + 1) % (n/5) == 0:
                 print "Iteration %d" % (j + 1)
         avg_nnz = sum_nnz / n
         avg_err = sum_err / n
