@@ -36,7 +36,7 @@ class multiOGD:
             self.train_sample(xtrain[i], int(ytrain[i]))
 
             # output to console
-            if (i+1) % 5000 == 0:
+            if (i+1) % 20000 == 0:
                 print "trained %d samples" % (i+1)
                 self.printlosses()
 
