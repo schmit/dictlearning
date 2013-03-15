@@ -2,6 +2,7 @@ import numpy as np
 import scipy.io as sio
 import adadictl1
 import adadictl2
+import adadictnolearning
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from multiOGD import *
@@ -32,7 +33,7 @@ DICT_LOSS = params.dict_loss
 DICT_REG = float(params.dict_reg)
 '''
 
-DICT_ACC = 0.5
+DICT_ACC = 0.40
 
 
 def showimage(x):
@@ -55,6 +56,8 @@ def run(n_obs, loss, reg, amount):
     ## Dictionary
     if loss == "l1":
         dictmod = adadictl1.AdaDictL1(dim, DICT_ACC, reg, amount)
+    elif loss == "nl":
+        dictmod = adadictnolearning.AdaDictNL(dim, DICT_ACC, reg, amount)
     else:
         dictmod = adadictl2.AdaDictL2(dim, DICT_ACC, reg, amount)
 
@@ -100,129 +103,86 @@ Atoms: 200
 Reg: 0.05  too much
 '''
 
+N_OBS = 50
+print "\n\n\n\n50 observations\n\n"
 
-N_OBS = 30
+print "NL \tLASSO \t0.00005"
+run(N_OBS, 'nl', 'lasso', 0.00025)
 
-print "\n\n\n\n50 observations "
+print "L1 \tLASSO \t0.00005"
+run(N_OBS, 'l1', 'lasso', 0.00004)
 
-print "\tL1 \tLASSO \t0.00005"
-run(N_OBS, 'l1', 'lasso', 0.00005)
-print "\tL2 \tLASSO \t0.0005"
-run(N_OBS, 'l2', 'lasso', 0.0005)
+print "L2 \tLASSO \t0.00005"
+run(N_OBS, 'l2', 'lasso', 0.0003)
 
-print "\tL1 \tKL \t1.0"
-run(N_OBS, 'l1', 'kl', 1.0)
-print "\tL2 \tKL \t1.0"
-run(N_OBS, 'l2', 'kl', 1.0)
-
-print "\tL1 \tNone"
-run(N_OBS, 'l2', 'linreg', 0.00001)
-print "\tL2 \tNone"
-run(N_OBS, 'l1', 'linreg', 0.00001)
 
 N_OBS = 100
+print "\n\n\n\n100 observations\n\n"
 
-print "\n\n\n\n100 observations "
+print "NL \tLASSO \t0.00005"
+run(N_OBS, 'nl', 'lasso', 0.00025)
 
-print "\tL1 \tLASSO \t0.00005"
-run(N_OBS, 'l1', 'lasso', 0.00005)
-print "\tL2 \tLASSO \t0.0005"
-run(N_OBS, 'l2', 'lasso', 0.0005)
+print "L1 \tLASSO \t0.00005"
+run(N_OBS, 'l1', 'lasso', 0.00004)
 
-print "\tL1 \tKL \t1.0"
-run(N_OBS, 'l1', 'kl', 1.0)
-print "\tL2 \tKL \t1.0"
-run(N_OBS, 'l2', 'kl', 1.0)
-
-print "\tL1 \tNone"
-run(N_OBS, 'l2', 'linreg', 0.00001)
-print "\tL2 \tNone"
-run(N_OBS, 'l1', 'linreg', 0.00001)
+print "L2 \tLASSO \t0.00005"
+run(N_OBS, 'l2', 'lasso', 0.0003)
 
 N_OBS = 300
-print "\n\n\n\n300 observations "
+print "\n\n\n\n300 observations\n\n"
 
-print "\tL1 \tLASSO \t0.00005"
-run(N_OBS, 'l1', 'lasso', 0.00005)
-print "\tL2 \tLASSO \t0.0005"
-run(N_OBS, 'l2', 'lasso', 0.0005)
+print "NL \tLASSO \t0.00005"
+run(N_OBS, 'nl', 'lasso', 0.00025)
 
-print "\tL1 \tKL \t1.0"
-run(N_OBS, 'l1', 'kl', 1.0)
-print "\tL2 \tKL \t1.0"
-run(N_OBS, 'l2', 'kl', 1.0)
+print "L1 \tLASSO \t0.00005"
+run(N_OBS, 'l1', 'lasso', 0.00004)
 
-print "\tL1 \tNone"
-run(N_OBS, 'l2', 'linreg', 0.00001)
-print "\tL2 \tNone"
-run(N_OBS, 'l1', 'linreg', 0.00001)
+print "L2 \tLASSO \t0.00005"
+run(N_OBS, 'l2', 'lasso', 0.0003)
 
 N_OBS = 1000
-print "\n\n\n\n1000 observations "
+print "\n\n\n\n1000 observations\n\n"
 
-print "\tL1 \tLASSO \t0.00005"
-run(N_OBS, 'l1', 'lasso', 0.00005)
-print "\tL2 \tLASSO \t0.0005"
-run(N_OBS, 'l2', 'lasso', 0.0005)
+print "NL \tLASSO \t0.00005"
+run(N_OBS, 'nl', 'lasso', 0.00025)
 
-print "\tL1 \tKL \t1.0"
-run(N_OBS, 'l1', 'kl', 1.0)
-print "\tL2 \tKL \t1.0"
-run(N_OBS, 'l2', 'kl', 1.0)
+print "L1 \tLASSO \t0.00005"
+run(N_OBS, 'l1', 'lasso', 0.00004)
 
-print "\tL1 \tNone"
-run(N_OBS, 'l2', 'linreg', 0.00001)
-print "\tL2 \tNone"
-run(N_OBS, 'l1', 'linreg', 0.00001)
+print "L2 \tLASSO \t0.00005"
+run(N_OBS, 'l2', 'lasso', 0.0003)
 
 N_OBS = 3000
-print "\n\n\n\n3000 observations "
+print "\n\n\n\n3000 observations\n\n"
 
-print "\tL1 \tLASSO \t0.00005"
-run(N_OBS, 'l1', 'lasso', 0.00005)
-print "\tL2 \tLASSO \t0.0005"
-run(N_OBS, 'l2', 'lasso', 0.0005)
+print "NL \tLASSO \t0.00005"
+run(N_OBS, 'nl', 'lasso', 0.00025)
 
-print "\tL1 \tKL \t1.0"
-run(N_OBS, 'l1', 'kl', 1.0)
-print "\tL2 \tKL \t1.0"
-run(N_OBS, 'l2', 'kl', 1.0)
+print "L1 \tLASSO \t0.00005"
+run(N_OBS, 'l1', 'lasso', 0.00004)
 
-print "\tL1 \tNone"
-run(N_OBS, 'l2', 'linreg', 0.00001)
-print "\tL2 \tNone"
-run(N_OBS, 'l1', 'linreg', 0.00001)
+print "L2 \tLASSO \t0.00005"
+run(N_OBS, 'l2', 'lasso', 0.0003)
 
 N_OBS = 10000
+print "\n\n\n\n10000 observations\n\n"
 
-print "\tL1 \tLASSO \t0.00005"
-run(N_OBS, 'l1', 'lasso', 0.00005)
-print "\tL2 \tLASSO \t0.0005"
-run(N_OBS, 'l2', 'lasso', 0.0005)
+print "NL \tLASSO \t0.00005"
+run(N_OBS, 'nl', 'lasso', 0.00025)
 
-print "\tL1 \tKL \t1.0"
-run(N_OBS, 'l1', 'kl', 1.0)
-print "\tL2 \tKL \t1.0"
-run(N_OBS, 'l2', 'kl', 1.0)
+print "L1 \tLASSO \t0.00005"
+run(N_OBS, 'l1', 'lasso', 0.00004)
 
-print "\tL1 \tNone"
-run(N_OBS, 'l2', 'linreg', 0.00001)
-print "\tL2 \tNone"
-run(N_OBS, 'l1', 'linreg', 0.00001)
+print "L2 \tLASSO \t0.00005"
+run(N_OBS, 'l2', 'lasso', 0.0003)
 
 N_OBS = 60000
 
-print "\tL1 \tLASSO \t0.00005"
-run(N_OBS, 'l1', 'lasso', 0.00005)
-print "\tL2 \tLASSO \t0.0005"
-run(N_OBS, 'l2', 'lasso', 0.0005)
+print "NL \tLASSO \t0.00005"
+run(N_OBS, 'nl', 'lasso', 0.00025)
 
-print "\tL1 \tKL \t1.0"
-run(N_OBS, 'l1', 'kl', 1.0)
-print "\tL2 \tKL \t1.0"
-run(N_OBS, 'l2', 'kl', 1.0)
+print "L1 \tLASSO \t0.00005"
+run(N_OBS, 'l1', 'lasso', 0.00004)
 
-print "\tL1 \tNone"
-run(N_OBS, 'l2', 'linreg', 0.00001)
-print "\tL2 \tNone"
-run(N_OBS, 'l1', 'linreg', 0.00001)
+print "L2 \tLASSO \t0.00005"
+run(N_OBS, 'l2', 'lasso', 0.0003)

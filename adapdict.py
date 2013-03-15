@@ -20,7 +20,7 @@ DICT_UPD_MAX_ITR = 50
 # Dictionary max itr seems to be never reached, but a nice fail safe
 
 # When to merge atoms when they are too similar
-DICT_MAX_ATOMS = 50
+DICT_MAX_ATOMS = 500
 DICT_MAX_CORR = 0.9
 
 # Accepts lower precision for the first observations
